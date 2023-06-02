@@ -1,0 +1,480 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+//18038352
+
+namespace Contact_List_Manager_program
+{
+  
+    public partial class Form1 : Form
+    {
+        private Contact[] phoneRec = new Contact[1];
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Write(Contact ob)
+        {
+            StreamWriter swOb = new StreamWriter("Contact.txt");
+            swOb.WriteLine(phoneRec.Length + 1);
+            swOb.WriteLine(ob.PhoneNum);
+            swOb.WriteLine(ob.FirstName);
+            swOb.WriteLine(ob.LastName);
+            
+
+            for (int i = 0; i < phoneRec.Length; i++)
+            {
+               
+                
+                swOb.WriteLine(phoneRec[i].PhoneNum);
+                swOb.WriteLine(phoneRec[i].FirstName);
+                swOb.WriteLine(phoneRec[i].LastName);
+            }
+            swOb.Close();
+
+        }
+
+        private void Read()
+        {
+            StreamReader srOb = new StreamReader("Contact.txt");
+            phoneRec = new Contact[Convert.ToInt64(srOb.ReadLine())];
+
+            for (int i = 0; i < phoneRec.Length; i++)
+            {
+                phoneRec[i] = new Contact();
+                phoneRec[i].PhoneNum = srOb.ReadLine();
+                phoneRec[i].FirstName = srOb.ReadLine();
+                phoneRec[i].LastName = srOb.ReadLine();
+
+
+            }
+
+            srOb.Close();
+        }
+
+        private void Display()
+        {
+            lstContacts.Items.Clear();
+            lstFirstName.Items.Clear();
+            lstLastName.Items.Clear();
+         
+
+
+            for (int i = 0; i < phoneRec.Length; i++)
+            {
+              
+                lstContacts.Items.Add(phoneRec[i].ToString());
+                lstFirstName.Items.Add(phoneRec[i].FirstName);
+                lstLastName.Items.Add(phoneRec[i].LastName);
+            }
+        }
+
+        private void Clear()
+
+        {
+            txtPhone.Text = String.Empty;
+            txtFirstName.Text = String.Empty;
+            txtLastName.Text = String.Empty;
+         
+
+
+
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            Contact ob = new Contact(txtPhone.Text, txtFirstName.Text, txtLastName.Text);
+
+            if (phoneRec.Length <= 29)
+            {
+                if (string.IsNullOrEmpty(txtPhone.Text) || string.IsNullOrEmpty(txtFirstName.Text) || string.IsNullOrEmpty(txtLastName.Text))
+                {
+                    MessageBox.Show("Fill in the required fields; Phone, First name and Last name");
+                }
+
+                else
+                {
+                    MessageBox.Show("Contact is added");
+                    Write(ob);
+                    Read();
+
+                    Display();
+                    Clear();
+
+                }
+                
+            }
+
+            else 
+            {
+                MessageBox.Show("30 contacts inserted has been reached!");
+                
+            }
+
+
+        
+
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            this.ControlBox = false;
+            Read();
+          
+            Display();
+
+        }
+
+        private void btnSort_Click(object sender, EventArgs e)
+        {
+            teleSort();
+            Display();
+        }
+
+        private void teleSort()
+        {
+            Contact tp;
+            bool swp;
+
+
+            do
+            {
+                swp = false;
+
+                for (int i = 0; i < (phoneRec.Length - 1); i++)
+                {
+                    if (phoneRec[i].PhoneNum.CompareTo(phoneRec[i + 1].PhoneNum) > 0)
+                    {
+                        tp = phoneRec[i];
+                        phoneRec[i] = phoneRec[i + 1];
+                        phoneRec[i + 1] = tp;
+                        swp = true;
+                    }
+                }
+            }
+            while (swp == true);
+
+        }
+
+        private void clearL()
+        {
+            if (phoneRec.Length > 0)
+            {
+                File.WriteAllText("Contact.txt", "");
+                lstContacts.Items.Clear();
+                lstFirstName.Items.Clear();
+                lstLastName.Items.Clear();
+               
+                Array.Clear(phoneRec, 0, phoneRec.Length);
+
+            }
+
+            else
+            {
+                MessageBox.Show("No data to clear");
+            }
+
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            clearL();
+            Read();
+        }
+
+        private void saveF(Contact ob)
+        {
+
+            if (File.Exists(txtSave.Text))
+            {
+                StreamWriter swOb = new StreamWriter(txtSave.Text);
+                
+                swOb.WriteLine(ob.PhoneNum);
+                swOb.WriteLine(ob.FirstName);
+                swOb.WriteLine(ob.LastName);
+             
+                for (int i = 0; i < phoneRec.Length; i++)
+                {
+                    swOb.WriteLine(phoneRec[i].PhoneNum);
+                    swOb.WriteLine(phoneRec[i].FirstName);
+                    swOb.WriteLine(phoneRec[i].LastName); 
+                }
+
+               if(MessageBox.Show("file already exist, do you want to overwrite this file?", "overwrite", MessageBoxButtons.YesNo, MessageBoxIcon.Question)==DialogResult.Yes)
+                {
+                    MessageBox.Show("Overwrite Complete");
+                }
+                swOb.Close();
+            }
+
+
+            else
+            {
+                StreamWriter swOb = new StreamWriter(txtSave.Text);
+               
+                swOb.WriteLine(ob.PhoneNum);
+                swOb.WriteLine(ob.FirstName);
+                swOb.WriteLine(ob.LastName);
+                
+                for (int i = 0; i < phoneRec.Length; i++)
+                {
+                    swOb.WriteLine(phoneRec[i].PhoneNum);
+                    swOb.WriteLine(phoneRec[i].FirstName);
+                    swOb.WriteLine(phoneRec[i].LastName);
+
+                }
+
+                MessageBox.Show("file has been saved");
+                swOb.Close();
+            }
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+
+            Contact ob = new Contact();
+            ob.PhoneNum = txtPhone.Text;
+            ob.FirstName = txtFirstName.Text;
+            ob.LastName = txtLastName.Text;
+
+            teleSort();
+            saveF(ob);
+        }
+
+        private void btnExit_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you sure you want to Exit ? ", "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                MessageBox.Show("Exiting...");
+                this.Close();
+            }
+        }
+
+        private void deleteB()
+        {
+            lstContacts.Items.RemoveAt(lstContacts.SelectedIndex);
+            lstFirstName.Items.RemoveAt(lstFirstName.SelectedIndex);
+            lstLastName.Items.RemoveAt(lstLastName.SelectedIndex);
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you sure you want to delete this ? ", "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                MessageBox.Show("Deleted");
+            }
+           
+            deleteB();
+            Clear();
+        }
+
+        private void btnLoadFile_Click(object sender, EventArgs e)
+        { 
+            try
+            {
+                OpenFileDialog opF = new OpenFileDialog();
+                opF.ShowDialog();
+
+                if (opF.ShowDialog() == DialogResult.OK)
+                {
+                    txtLoad.Text = opF.FileName;
+                }
+            }
+
+            catch
+            {
+
+            }
+
+            try
+            {
+                string[] lines = System.IO.File.ReadAllLines(txtLoad.Text.TrimEnd());
+                foreach (string line in lines)
+                {
+                    lstContacts.Items.Add(line);
+                }
+            }
+
+            catch
+            {
+
+            }
+
+        }
+
+        private void rbtnFirst_CheckedChanged(object sender, EventArgs e)
+        {
+            
+
+        }
+
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            lstContacts.SelectedItems.Clear();
+            lstFirstName.SelectedItems.Clear();
+            lstLastName.SelectedItems.Clear();
+
+            for (int s = lstContacts.Items.Count - 1; s >= 0; s--)
+            {
+                if (lstContacts.Items[s].ToString().ToLower().Contains(txtSearch.Text.ToLower()))
+                {
+                    lstContacts.SetSelected(s, true);
+                }
+
+                lblSearch.Text = lstContacts.SelectedItems.Count.ToString() + " data found";
+            }
+
+            if (rbtnFirst.Checked == true)
+            {
+                for(int s = 0; s < lstLastName.Items.Count; s++)
+                {
+                    if(lstFirstName.Items.Contains(txtSearch.Text))
+                    {
+                        MessageBox.Show(txtSearch.Text + " is found");
+                        break;
+                    }
+
+                    else
+                    {
+                        MessageBox.Show("Cannot be found in the system");
+                        break;
+
+                    }
+                }
+            }
+
+            for(int s = lstFirstName.Items.Count - 1; s >= 0; s--)
+            {
+                if (lstFirstName.Items[s].ToString().ToLower().Contains(txtSearch.Text.ToLower()))
+                {
+                    lstFirstName.SetSelected(s, true);
+                }
+                lblSearch.Text = lstFirstName.SelectedItems.Count.ToString() + " data found";
+            }
+
+            if (rbtnLast.Checked == true)
+            {
+                for (int s = 0; s < lstFirstName.Items.Count; s++)
+                {
+                    if (lstLastName.Items.Contains(txtSearch.Text))
+                    {
+                        MessageBox.Show(txtSearch.Text + " is found");
+                        break;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Cannot be found in the system");
+                        break;
+                    }
+                }
+            }
+
+            for (int s = lstLastName.Items.Count - 1; s >= 0; s--)
+            {
+                if (lstLastName.Items[s].ToString().ToLower().Contains(txtSearch.Text.ToLower()))
+                {
+                    lstLastName.SetSelected(s, true);
+                }
+
+                lblSearch.Text = lstLastName.SelectedItems.Count.ToString() + " items found";
+            }
+
+            if (rbtnPhone.Checked == true)
+            {
+                binarySearch();
+            }
+            txtSearch.Clear();
+        }
+
+        private void binarySearch()
+        {
+            string s = txtSearch.Text.ToString();
+            int b = lstContacts.Items.Count;
+            int st = 0, end = b - 1, mid = (st + end) / 2;
+
+            while (st <- end)
+            {
+                mid = (st + end) / 2;
+                if (s == Convert.ToString(lstContacts.Items[mid]))
+                {
+                    MessageBox.Show("Phone number has been found in position " + mid); 
+
+                }
+            }
+        }
+    }
+
+    class Contact
+    {
+        private string phoneNum;
+        private string firstName;
+        private string lastName;
+
+        public string PhoneNum
+        {
+            get
+            { return phoneNum; }
+            set
+            {
+
+                if (value.Length == 11)
+                {
+                    phoneNum = value;
+
+                }
+
+                else
+                {
+                    phoneNum = "";
+                }
+            }
+        }
+        public string FirstName
+        {
+            get
+            { return firstName; }
+            set
+            { firstName = value; }
+        }
+
+        public string LastName
+        {
+            get
+            { return lastName; }
+            set
+            { lastName = value; }
+        }
+
+        public Contact()
+        {
+            PhoneNum = "";
+            FirstName = "";
+            LastName = "";
+        }
+
+        public Contact(string phoneNum, string firstName, string lastName)
+        {
+            PhoneNum = phoneNum;
+            FirstName = firstName;
+            LastName = lastName;
+        }
+
+        public override string ToString()
+        {
+            string output = String.Empty;
+
+            output += String.Format("({0})", PhoneNum.Substring(0, 11));
+
+            return output;
+        }
+    }
+}
